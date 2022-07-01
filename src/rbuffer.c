@@ -1,64 +1,64 @@
 #include "rbuffer.h"
+#include <stdlib.h>
+#include <string.h>
 
-cbuffer_t cbuffer_create(void* buffer, int buffersize, size_t typesize)
+cbuffer_t* cbuffer_create(size_t capacity, size_t typesize)
 {
-    const void* arena = malloc(buffersize*typesize);
-    cbuffer_t cbuffer = {
-        .buffer = buffer,
-        .start = arena,
-        .end = arena,
-        .count = 0,
-        .size = buffersize
-    };
-    return cbuffer;
-};
-
-static size_t cbuffer_get_next_buffer_position(cbuffer_t* cbuffer, size_t position)
-{
-    bool overflow = (position + 1) >= cbuffer->size;
-    return (overflow) ? 0 : position + 1;
-};
-
-void cbuffer_push(cbuffer_t* cbuffer, void* elm)
-{
-    if (cbuffer->count == cbuffer->size) {
-        size_t pos = cbuffer_get_next_buffer_position(cbuffer, cbuffer->start);
-        // memcpy(S->top, data, S->typesize);
-        // S->top = (void*)( (int)S->top + S->typesize );
-        cbuffer->start = cbuffer_get_next_buffer_position(cbuffer, cbuffer->start);
-    } else
-        cbuffer->count++;
-    cbuffer->buffer[cbuffer->end] = elm;
-    cbuffer->end = cbuffer_get_next_buffer_position(cbuffer, cbuffer->end);
-};
-
-void* cbuffer_shift(cbuffer_t* cbuffer)
-{
-    void* elm = &cbuffer->buffer[cbuffer->start];
-    if (cbuffer->count > 0)
-    {
-        cbuffer->start = cbuffer_get_next_buffer_position(cbuffer->start);
-        cbuffer->count--;
+    cbuffer_t *cb = malloc(sizeof(*cb)+capacity*typesize);
+ 
+    if (cb) {
+        	cb -> start = 0;
+        	cb -> end = 0;
+	        cb -> size = 0;
+        	cb -> capacity = capacity;
+		cb -> typesize = typesize;
     }
-    return elm;
+   
+    return cb;
 };
 
-bool cbuffer_t_available(const cbuffer_t* cbuffer)
+static size_t cbuffer_get_next_buffer_position(cbuffer_t* cb, size_t position)
 {
-    return cbuffer->count > 0;
+    return ((position + 1) >= cb->capacity) ? 0 : position + 1;
 };
 
-
-size_t cbuffer_size(const cbuffer_t* cbuffer)
+void cbuffer_push(cbuffer_t* cb, const void* elm)
 {
-    return cbuffer->count;
+    if (cb->size == cb->capacity) {
+        cb->start = cbuffer_get_next_buffer_position(cb, cb->start);
+    } else   
+	cb->size++;
+    memcpy(cb->buffer + cb->end*cb->typesize, elm, cb->typesize);
+    cb->end = cbuffer_get_next_buffer_position(cb, cb->end); 
 };
 
-void cbuffer_reset(cbuffer_t* cbuffer) {
-    cbuffer->start = cbuffer->end;
+int cbuffer_shift(cbuffer_t* cb, void* elm)
+{
+    memcpy(elm, cb->buffer + cb->start*cb->typesize, cb->typesize);
+    if (cb->size > 0)
+    {
+        cb->start = cbuffer_get_next_buffer_position(cb, cb->start);
+        cb->size--;
+    }
+    return 0;
+};
+
+bool cbuffer_t_available(const cbuffer_t* cb)
+{
+    return cb->size > 0;
+};
+
+
+size_t cbuffer_size(const cbuffer_t* cb)
+{
+    return cb->size;
+};
+
+void cbuffer_reset(cbuffer_t* cb) {
+    cb->start = cb->end;
 }
 
-void* cbuffer_at(const cbuffer_t* cbuffer, size_t position) {
-    void* elm = &cbuffer->buffer[position];
-    return elm;
-}
+//int cbuffer_at(const cbuffer_t* cb, size_t position, void* elm) {
+//    memcpy(elm, cb->buffer + cb->start*cb->typesize, cb->typesize);
+//    return 0;
+//}

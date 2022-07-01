@@ -5,25 +5,28 @@
 #include <stdbool.h>
 
 typedef struct {
-    void* buffer;
-    void* start;
-    void* end;
-    size_t count;
+    size_t start;
+    size_t end;
     size_t size;
+    size_t capacity;
+    size_t typesize;
+    unsigned char buffer[];
 } cbuffer_t;
 
-cbuffer_t cbuffer_create(void*, int, size_t);
+typedef cbuffer_t* cbuffer;
+
+cbuffer_t* cbuffer_create(size_t capacity, size_t typesize);
 
 bool cbuffer_available(const cbuffer_t*);
 
-void* cbuffer_shift(cbuffer_t*);
+int cbuffer_shift(cbuffer_t*, void*);
 
-size_t cbuffer_length(const cbuffer_t*);
-
-void cbuffer_push(cbuffer_t*, void*);
+void cbuffer_push(cbuffer_t*, const void*);
 
 void cbuffer_reset(cbuffer_t*);
 
-void* cbuffer_at(const cbuffer_t*, size_t);
+//int cbuffer_at(const cbuffer_t*, size_t, void*);
+
+size_t cbuffer_size(const cbuffer_t*);
 
 #endif

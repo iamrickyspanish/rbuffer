@@ -3,8 +3,8 @@ CFLAGS=-Wall -g -Iinc
 SRCDIR=src
 OBJDIR=obj
 DSTDIR=dst
-SRCS=$(SRCDIR)/rbuffer.c
-OBJS=$(OBJDIR)/rbuffer.o $(OBJDIR)/test.o
+SRCS=$(SRCDIR)/rbuffer.c ./test.c
+OBJS=$(OBJDIR)/rbuffer.o ./test.o
 INCDIR=inc
 
 all: $(OBJS)
