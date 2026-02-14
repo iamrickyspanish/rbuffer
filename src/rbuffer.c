@@ -43,7 +43,7 @@ int cbuffer_shift(cbuffer_t* cb, void* elm)
     return 0;
 };
 
-bool cbuffer_t_available(const cbuffer_t* cb)
+bool cbuffer_available(const cbuffer_t* cb)
 {
     return cb->size > 0;
 };
